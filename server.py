@@ -382,26 +382,24 @@ def pick_trailer_stream(info: dict) -> str:
 
 
 def fetch_trailer_data(title: str, youtube_id: str, search: str) -> dict:
-    cache_key = (youtube_id or title, search)
-    cached = TRAILER_CACHE.get(cache_key)
-    if cached and (time.time() - cached[0]) < TRAILER_TTL:
-        return cached[1]
+    if not youtube_id:
+        return {
+            "title": title,
+            "youtubeId": "",
+            "thumbnail": "",
+            "streamUrl": "",
+            "embedUrl": "",
+            "watchUrl": f"https://www.youtube.com/results?search_query={quote(search)}",
+        }
 
-    source = f"https://www.youtube.com/watch?v={youtube_id}" if youtube_id else f"ytsearch1:{search}"
-    with YoutubeDL({"quiet": True, "skip_download": True, "noplaylist": True}) as ydl:
-        info = ydl.extract_info(source, download=False)
-    if info.get("_type") == "playlist":
-        entries = [entry for entry in info.get("entries", []) if entry]
-        info = entries[0] if entries else {}
-
-    data = {
-        "title": info.get("title", title),
-        "youtubeId": info.get("id", youtube_id),
-        "thumbnail": info.get("thumbnail", ""),
-        "streamUrl": pick_trailer_stream(info),
+    return {
+        "title": title,
+        "youtubeId": youtube_id,
+        "thumbnail": f"https://img.youtube.com/vi/{youtube_id}/hqdefault.jpg",
+        "streamUrl": "",
+        "embedUrl": f"https://www.youtube.com/embed/{youtube_id}",
+        "watchUrl": f"https://www.youtube.com/watch?v={youtube_id}",
     }
-    TRAILER_CACHE[cache_key] = (time.time(), data)
-    return data
 
 
 class WatchlistHandler(SimpleHTTPRequestHandler):
