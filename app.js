@@ -950,19 +950,21 @@ async function loadTrailer(item) {
     if (requestId !== trailerRequest || activeId !== item.id || activeTab !== "trailer") {
       return;
     }
-    if (!data.streamUrl) {
-      showEmbeddedTrailer(item, data, "The direct stream is unavailable, so the in-page YouTube fallback is loading.");
-      return;
-    }
-    trailerPlayer.src = data.streamUrl;
-    trailerPlayer.poster = data.thumbnail || item.poster || "";
-    trailerPlayer.hidden = false;
-    trailerControls.hidden = false;
-    trailerStatus.textContent = data.title ? `Now playing: ${data.title}` : "";
-    trailerPlayer.load();
-    trailerPlayer.currentTime = 0;
-    updateTrailerReadout();
-    safePlayTrailer(item, data);
+    if (data.embedUrl || data.youtubeId || trailerIds[item.title]) {
+  showEmbeddedTrailer(item, data, "Loading the YouTube trailer embed.");
+  return;
+}
+
+if (data.watchUrl) {
+  trailerStatus.innerHTML = `Trailer could not open in-page. <a href="${data.watchUrl}" target="_blank" rel="noopener">Open trailer on YouTube</a>.`;
+  trailerControls.hidden = true;
+  trailerReadout.textContent = "Open trailer on YouTube";
+  return;
+}
+
+trailerStatus.textContent = "This trailer could not be resolved right now.";
+trailerControls.hidden = true;
+trailerReadout.textContent = "Waiting for a trailer...";
   } catch {
     if (requestId === trailerRequest && activeId === item.id) {
       trailerStatus.textContent = "This trailer could not be resolved for in-page playback right now.";
