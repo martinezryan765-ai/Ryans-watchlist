@@ -482,7 +482,7 @@ class WatchlistHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("WATCHLIST_PORT", "8765"))
-    server = ThreadingHTTPServer(("127.0.0.1", port), WatchlistHandler)
+    server = ThreadingHTTPServer(("0.0.0.0", port), WatchlistHandler)
     print(f"Serving Ryan's Watchlist at http://127.0.0.1:{port}/")
     server.serve_forever()
 
